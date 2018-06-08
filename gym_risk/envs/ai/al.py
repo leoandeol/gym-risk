@@ -1,4 +1,4 @@
-from ai import AI
+from gym_risk.envs.ai import AI
 from collections import defaultdict
 import random
 
@@ -9,7 +9,7 @@ class AlAI(AI):
     area_priority = ['Australia', 'South America', 'North America', 
                      'Africa', 'Europe', 'Asia']
 
-    def initial_placement(self, empty, remaining):
+    def initial_placement(self, empty):
         if empty:
             owned_by_area = defaultdict(int)
             for t in self.world.territories.values():

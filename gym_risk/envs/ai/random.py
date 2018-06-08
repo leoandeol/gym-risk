@@ -1,4 +1,4 @@
-from ai import AI
+from gym_risk.envs.ai import AI
 import random
 import collections
 
@@ -7,7 +7,7 @@ class RandomAI(AI):
     RandomAI: Plays a completely random game, randomly choosing and reinforcing
     territories, and attacking wherever it can without any considerations of wisdom.
     """
-    def initial_placement(self, empty, remaining):
+    def initial_placement(self, empty):
         if empty:
             return random.choice(empty)
         else:

@@ -2,11 +2,12 @@ from copy import deepcopy
 
 
 class Player(object):
-    def __init__(self, name, game, ai_class, ai_kwargs):
+    def __init__(self, name, game, ai_class):
         self.name = name
         self.color = 0
         self.ord = 32
-        self.ai = ai_class(self, game, game.world, **ai_kwargs)
+        if ai_class is not None:
+            self.ai = ai_class(self, game, game.world)
         self.world = game.world
 
     @property

@@ -1,4 +1,4 @@
-from gym_risk.envs.display import Display, CursesDisplay
+from gym_risk.envs.display import Display
 from gym_risk.envs.player import Player
 from gym_risk.envs.territory import World
 from gym_risk.envs.world import CONNECT, AREAS, MAP, KEY
@@ -21,7 +21,7 @@ class Game(object):
         "connect": CONNECT,  # the territory connection graph (see world.py)
         "areas": AREAS,  # the territory->continent mapping, and values
         "cmap": MAP,  # the ASCII art map to use
-        "ckey": KEY,  # the territority->char mapping key for the map
+        "ckey": KEY,  # the territory->char mapping key for the map
         "screen": None,  # a curses.window (for use with the curses.wrapper function)
         "round": None,  # the round number
         "wait": False,  # whether to pause and wait for a keypress after each event
@@ -31,7 +31,7 @@ class Game(object):
 
     def __init__(self, **options):
         self.options = self.defaults.copy()
-        self.options.update(options)
+        #self.options.update(options)
 
         self.world = World()
         self.world.load(self.options['areas'], self.options['connect'])
@@ -41,16 +41,12 @@ class Game(object):
         self.turn = 0
         self.turn_order = []
 
-        if self.options['curses']:
-            self.display = CursesDisplay(self.options['screen'], self,
-                                         self.options['cmap'], self.options['ckey'],
-                                         self.options['color'], self.options['wait'])
-        else:
-            self.display = Display()
+        self.display = Display()
 
-    def add_player(self, name, ai_class, **ai_kwargs):
+    def add_player(self, name, ai_class):
         assert name not in self.players
-        player = Player(name, self, ai_class, ai_kwargs)
+        assert len(self.players) <= 5
+        player = Player(name, self, ai_class)
         self.players[name] = player
 
     @property
@@ -60,7 +56,7 @@ class Game(object):
 
     def aiwarn(self, *args):
         """Generate a warning message when an AI player tries to break the rules."""
-        logging.getLogger("pyrisk.player.%s" % self.player.ai.__class__.__name__).warn(*args)
+        logging.getLogger("pyrisk.player.%s" % self.player.ai.__class__.__name__).warning(*args)
 
     def event(self, msg, territory=None, player=None):
         """
@@ -79,8 +75,9 @@ class Game(object):
         for p in self.players.values():
             p.ai.event(msg)
 
-    def play(self):
+    def init(self):
         assert 2 <= len(self.players) <= 6
+        self.add_player("Player", None)
         self.turn_order = list(self.players)
         random.shuffle(self.turn_order)
         for i, name in enumerate(self.turn_order):
@@ -88,7 +85,27 @@ class Game(object):
             self.players[name].ord = ord('\/-|+*'[i])
             self.players[name].ai.start()
         self.event(("start",))
-        live_players = len(self.players)
+
+        #first AI plays if they come before the player
+        empty = list(self.world.territories.values())
+        available = 35 - 2 * len(self.players)
+        remaining = {p: available for p in self.players}
+        if self.options['deal']:
+            random.shuffle(empty)
+            while empty:
+                t = empty.pop()
+                t.forces += 1
+                remaining[self.player.name] -= 1
+                t.owner = self.player
+                self.event(("deal", self.player, t), territory=[t], player=[self.player.name])
+                self.turn += 1
+        else:
+        return list(self.world.territories.values())
+
+    def step(self, action):
+        pass
+
+    def play(self):
         self.initial_placement()
 
         while live_players > 1:
@@ -208,20 +225,7 @@ class Game(object):
             target.forces = n_def
             return False
 
-    def initial_placement(self):
-        empty = list(self.world.territories.values())
-        available = 35 - 2 * len(self.players)
-        remaining = {p: available for p in self.players}
-
-        if self.options['deal']:
-            random.shuffle(empty)
-            while empty:
-                t = empty.pop()
-                t.forces += 1
-                remaining[self.player.name] -= 1
-                t.owner = self.player
-                self.event(("deal", self.player, t), territory=[t], player=[self.player.name])
-                self.turn += 1
+    def initial_placement(self, empty):
         else:
             while empty:
                 choice = self.player.ai.initial_placement(empty, remaining[self.player.name])

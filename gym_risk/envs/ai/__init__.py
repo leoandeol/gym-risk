@@ -1,11 +1,13 @@
 import random
 import logging
 
+
 class AI(object):
     """
     Base class for AIs to inherit from, containing some utility methods
     """
     _sim_cache = {}
+
     @classmethod
     def simulate(cls, n_atk, n_def, tests=1000):
         """
@@ -41,14 +43,13 @@ class AI(object):
                 victory += 1
             else:
                 d_survive.append(d)
-        
-        cls._sim_cache[(n_atk, n_def)] = (float(victory) / tests, 
+
+        cls._sim_cache[(n_atk, n_def)] = (float(victory) / tests,
                                           (float(sum(a_survive)) / victory) if victory else 0,
                                           (float(sum(d_survive)) / (tests - victory)) if tests - victory else 0)
         return cls._sim_cache[(n_atk, n_def)]
-            
 
-    def __init__(self, player, game, world, **kwargs):
+    def __init__(self, player, game, world):
         """
         Initialise the AI class. Don't override this, rather instead use the
         start() method to do any setup which you require.
@@ -60,7 +61,7 @@ class AI(object):
         self.game = game
         self.world = world
         self.logger = logging.getLogger("pyrisk.ai.%s" % self.__class__.__name__)
-    
+
     def loginfo(self, msg, *args):
         """
         Logging methods. These messages will appear at the bottom of the screen
@@ -68,15 +69,15 @@ class AI(object):
         specify that at the command line. 
         """
         self.logger.info(msg, *args)
-        
+
     def logwarn(self, msg, *args):
         """As loginfo, but slightly more emphasis."""
         self.logger.warn(msg, *args)
-        
+
     def logerror(self, msg, *args):
         """As loginfo, but will cause curses mode to pause for longer over this message."""
         self.logger.error(msg, *args)
-    
+
     def start(self):
         """
         This method is called when the game starts. Implement it if you want
@@ -123,7 +124,7 @@ class AI(object):
         Return a dictionary of territory object or name -> count, which should sum to `available`.
         """
         raise NotImplementedError
-    
+
     def attack(self):
         """
         Combat stage of a turn.
