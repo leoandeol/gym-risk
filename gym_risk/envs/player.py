@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+
 class Player(object):
     def __init__(self, name, game, ai_class, ai_kwargs):
         self.name = name
@@ -28,7 +29,7 @@ class Player(object):
             if a.owner == self:
                 yield a
 
-    @property    
+    @property
     def forces(self):
         return sum(t.forces for t in self.territories)
 
@@ -38,14 +39,14 @@ class Player(object):
 
     @property
     def reinforcements(self):
-        return max(self.territory_count//3, 3) + sum(a.value for a in self.areas)
+        return max(self.territory_count // 3, 3) + sum(a.value for a in self.areas)
 
     def __repr__(self):
         return "P;%s;%s" % (self.name, self.ai.__class__.__name__)
 
     def __hash__(self):
         return hash(("player", self.name))
-        
+
     def __eq__(self, other):
         if isinstance(other, Player):
             return self.name == other.name
