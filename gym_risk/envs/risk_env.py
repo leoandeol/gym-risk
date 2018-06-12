@@ -15,7 +15,7 @@ class RiskEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
-        pass
+        self.game = None
 
     def seed(self, seed=None):
         # todo improve with gym.utils.seeding
@@ -28,7 +28,7 @@ class RiskEnv(gym.Env):
         return self.game.init()
 
     def step(self, action):
-        pass
+        return self.game.step(action)
 
     # todo render, curses and so on
     def render(self, mode='human', close=False):

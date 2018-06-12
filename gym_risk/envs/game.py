@@ -41,6 +41,9 @@ class Game(object):
         self.turn = 0
         self.turn_order = []
 
+        self.remaining = {}
+        self.drafting = False
+
         self.display = Display()
 
     def add_player(self, name, ai_class):
@@ -85,25 +88,64 @@ class Game(object):
             self.players[name].ord = ord('\/-|+*'[i])
             self.players[name].ai.start()
         self.event(("start",))
-
-        #first AI plays if they come before the player
         empty = list(self.world.territories.values())
         available = 35 - 2 * len(self.players)
-        remaining = {p: available for p in self.players}
+        self.remaining = {p: available for p in self.players}
         if self.options['deal']:
             random.shuffle(empty)
             while empty:
                 t = empty.pop()
                 t.forces += 1
-                remaining[self.player.name] -= 1
+                self.remaining[self.player.name] -= 1
                 t.owner = self.player
                 self.event(("deal", self.player, t), territory=[t], player=[self.player.name])
                 self.turn += 1
+            while sum(self.remaining.values()) > 0:
+                if self.remaining[self.player.name] > 0:
+                    choice = self.player.ai.initial_placement(None, self.remaining[self.player.name])
+                    t = self.world.territory(choice)
+                    if t is None:
+                        self.aiwarn("initial invalid territory %s", choice)
+                        self.turn += 1
+                        continue
+                    if t.owner != self.player:
+                        self.aiwarn("initial unowned territory %s", t.name)
+                        self.turn += 1
+                        continue
+                    t.forces += 1
+                    self.remaining[self.player.name] -= 1
+                    self.event(("reinforce", self.player, t, 1), territory=[t], player=[self.player.name])
+                    self.turn += 1
+                    #todo which data structure
+                    return list(self.world.territories.values())
         else:
-        return list(self.world.territories.values())
+            return self.initial_placement(empty)
 
     def step(self, action):
-        pass
+        if not self.drafting:
+            t = self.world.territory(action)
+            if t is None:
+                self.aiwarn("invalid territory choice %s", action)
+                self.turn += 1
+            if (t.owner is not None) or (t.owner is not self.player):
+                self.aiwarn("initial invalid empty territory %s", t.name)
+                self.turn += 1
+            t.forces += 1
+            self.remaining[self.player.name] -= 1
+            if t.owner is None:
+                t.owner = self.player
+                self.event(("claim", self.player, t), territory=[t], player=[self.player.name])
+            else:
+                self.event(("reinforce", self.player, t, 1), territory=[t], player=[self.player.name])
+            self.turn += 1
+            empty = [x for x in self.world.territories if x.owner is None]
+            result = self.initial_placement(empty)
+            if result is not None:
+                # observation, reward, done, info
+                # todo reward
+                return result, 0, False, {}
+
+        #play
 
     def play(self):
         self.initial_placement()
@@ -226,9 +268,9 @@ class Game(object):
             return False
 
     def initial_placement(self, empty):
-        else:
-            while empty:
-                choice = self.player.ai.initial_placement(empty, remaining[self.player.name])
+        while empty:
+            if self.player.ai is not None:
+                choice = self.player.ai.initial_placement(empty, self.remaining[self.player.name])
                 t = self.world.territory(choice)
                 if t is None:
                     self.aiwarn("invalid territory choice %s", choice)
@@ -240,24 +282,31 @@ class Game(object):
                     continue
                 t.forces += 1
                 t.owner = self.player
-                remaining[self.player.name] -= 1
+                self.remaining[self.player.name] -= 1
                 empty.remove(t)
                 self.event(("claim", self.player, t), territory=[t], player=[self.player.name])
                 self.turn += 1
+            else:
+                return list(self.world.territories.values())
+        while sum(self.remaining.values()) > 0:
+            if self.remaining[self.player.name] > 0:
+                if self.player.ai is not None:
+                    choice = self.player.ai.initial_placement(None, self.remaining[self.player.name])
+                    t = self.world.territory(choice)
+                    if t is None:
+                        self.aiwarn("initial invalid territory %s", choice)
+                        self.turn += 1
+                        continue
+                    if t.owner != self.player:
+                        self.aiwarn("initial unowned territory %s", t.name)
+                        self.turn += 1
+                        continue
+                    t.forces += 1
+                    self.remaining[self.player.name] -= 1
+                    self.event(("reinforce", self.player, t, 1), territory=[t], player=[self.player.name])
+                    self.turn += 1
+                else:
+                    return list(self.world.territories.values())
 
-        while sum(remaining.values()) > 0:
-            if remaining[self.player.name] > 0:
-                choice = self.player.ai.initial_placement(None, remaining[self.player.name])
-                t = self.world.territory(choice)
-                if t is None:
-                    self.aiwarn("initial invalid territory %s", choice)
-                    self.turn += 1
-                    continue
-                if t.owner != self.player:
-                    self.aiwarn("initial unowned territory %s", t.name)
-                    self.turn += 1
-                    continue
-                t.forces += 1
-                remaining[self.player.name] -= 1
-                self.event(("reinforce", self.player, t, 1), territory=[t], player=[self.player.name])
-                self.turn += 1
+        self.drafting = True
+        return None
