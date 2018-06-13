@@ -28,21 +28,24 @@ class Game(object):
         "history": {},  # the win/loss history for each player, for multiple rounds
         "deal": False  # deal out territories rather than let players choose
     }
+    #todo recoder, les IAs devraient renvoyer action par action, et non pas renvoyer un generateur
 
     def __init__(self, **options):
         self.options = self.defaults.copy()
-        #self.options.update(options)
+        # self.options.update(options)
 
         self.world = World()
         self.world.load(self.options['areas'], self.options['connect'])
 
         self.players = {}
+        self.live_players = 0
 
         self.turn = 0
         self.turn_order = []
 
         self.remaining = {}
         self.drafting = False
+        self.finished = False
 
         self.display = Display()
 
@@ -81,6 +84,7 @@ class Game(object):
     def init(self):
         assert 2 <= len(self.players) <= 6
         self.add_player("Player", None)
+        self.live_players = len(self.players)
         self.turn_order = list(self.players)
         random.shuffle(self.turn_order)
         for i, name in enumerate(self.turn_order):
@@ -116,12 +120,13 @@ class Game(object):
                     self.remaining[self.player.name] -= 1
                     self.event(("reinforce", self.player, t, 1), territory=[t], player=[self.player.name])
                     self.turn += 1
-                    #todo which data structure
+                    # todo which data structure
                     return list(self.world.territories.values())
         else:
             return self.initial_placement(empty)
 
     def step(self, action):
+        #todo check self.player.ai == none at any time
         if not self.drafting:
             t = self.world.territory(action)
             if t is None:
@@ -144,13 +149,99 @@ class Game(object):
                 # observation, reward, done, info
                 # todo reward
                 return result, 0, False, {}
+            else:
+                #todo not sure
+                self.play()
+        # play
+        elif not self.finished:
+            # todo myactions
+            assert sum(action.values()) == self.player.reinforcements
+            for tt, ff in action.items():
+                t = self.world.territory(tt)
+                f = int(ff)
+                if t is None:
+                    self.aiwarn("reinforce invalid territory %s", tt)
+                    continue
+                if t.owner != self.player:
+                    self.aiwarn("reinforce unowned territory %s", t.name)
+                    continue
+                if f < 0:
+                    self.aiwarn("reinforce invalid count %s", f)
+                    continue
+                t.forces += f
+                self.event(("reinforce", self.player, t, f), territory=[t], player=[self.player.name])
 
-        #play
+            for src, target, attack, move in self.player.ai.attack():
+                st = self.world.territory(src)
+                tt = self.world.territory(target)
+                if st is None:
+                    self.aiwarn("attack invalid src %s", src)
+                    continue
+                if tt is None:
+                    self.aiwarn("attack invalid target %s", target)
+                    continue
+                if st.owner != self.player:
+                    self.aiwarn("attack unowned src %s", st.name)
+                    continue
+                if tt.owner == self.player:
+                    self.aiwarn("attack owned target %s", tt.name)
+                    continue
+                if tt not in st.connect:
+                    self.aiwarn("attack unconnected %s %s", st.name, tt.name)
+                    continue
+                initial_forces = (st.forces, tt.forces)
+                opponent = tt.owner
+                victory = self.combat(st, tt, attack, move)
+                final_forces = (st.forces, tt.forces)
+                self.event(("conquer" if victory else "defeat", self.player, opponent, st, tt, initial_forces,
+                            final_forces), territory=[st, tt], player=[self.player.name, tt.owner.name])
+            # todo freemove for player
+            # freemove = self.player.ai.freemove()
+            # if freemove:
+            #     src, target, count = freemove
+            #     st = self.world.territory(src)
+            #     tt = self.world.territory(target)
+            #     f = int(count)
+            #     valid = True
+            #     if st is None:
+            #         self.aiwarn("freemove invalid src %s", src)
+            #         valid = False
+            #     if tt is None:
+            #         self.aiwarn("freemove invalid target %s", target)
+            #         valid = False
+            #     if st.owner != self.player:
+            #         self.aiwarn("freemove unowned src %s", st.name)
+            #         valid = False
+            #     if tt.owner != self.player:
+            #         self.aiwarn("freemove unowned target %s", tt.name)
+            #         valid = False
+            #     if not 0 <= f < st.forces:
+            #         self.aiwarn("freemove invalid count %s", f)
+            #         valid = False
+            #     if valid:
+            #         st.forces -= count
+            #         tt.forces += count
+            #         self.event(("move", self.player, st, tt, count), territory=[st, tt], player=[self.player.name])
+            self.live_players = len([p for p in self.players.values() if p.alive])
+            self.turn += 1
+            # other AIs play
+            self.play()
+            if not self.player.alive:
+                return list(self.world.territories.values()), -100, True, {}
+            elif self.live_players == 1:
+                self.finished = True
+                winner = [p for p in self.players.values() if p.alive][0]
+                self.event(("victory", winner), player=[self.player.name])
+                for p in self.players.values():
+                    if p.ai is not None:
+                        p.ai.end()
+                reward = 100 if winner.ai is None else -100
+                return list(self.world.territories.values()), reward, True, {}
+            else:
+                return list(self.world.territories.values()), 0, False, {}
 
     def play(self):
-        self.initial_placement()
-
-        while live_players > 1:
+        while self.live_players > 1 and self.player.ai is not None:
             if self.player.alive:
                 choices = self.player.ai.reinforce(self.player.reinforcements)
                 assert sum(choices.values()) == self.player.reinforcements
@@ -219,13 +310,8 @@ class Game(object):
                         st.forces -= count
                         tt.forces += count
                         self.event(("move", self.player, st, tt, count), territory=[st, tt], player=[self.player.name])
-                live_players = len([p for p in self.players.values() if p.alive])
+                self.live_players = len([p for p in self.players.values() if p.alive])
             self.turn += 1
-        winner = [p for p in self.players.values() if p.alive][0]
-        self.event(("victory", winner), player=[self.player.name])
-        for p in self.players.values():
-            p.ai.end()
-        return winner.name
 
     def combat(self, src, target, f_atk, f_move):
         n_atk = src.forces

@@ -11,7 +11,7 @@ class RiskEnv(gym.Env):
     3 players Risk with two Random AI to compete against
     """
     # todo different AIs to compete against
-
+    # todo env space (discrete/box) + info from step
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
