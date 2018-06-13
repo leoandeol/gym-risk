@@ -123,8 +123,10 @@ class Game(object):
                     self.remaining[self.player.name] -= 1
                     self.event(("reinforce", self.player, t, 1), territory=[t], player=[self.player.name])
                     self.turn += 1
+                    self.play()
+                    self.drafting = True
                     # todo which data structure
-                    return list(self.world.territories.values())
+                    return "combat", list(self.world.territories.values())
         else:
             return self.initial_placement(empty)
 
@@ -151,7 +153,7 @@ class Game(object):
             if result is not None:
                 # observation, reward, done, info
                 # todo reward
-                return result, 0, False, {}
+                return ("drafting",result), 0, False, {}
             else:
                 # todo not sure
                 self.play()
@@ -230,7 +232,7 @@ class Game(object):
             # other AIs play
             self.play()
             if not self.player.alive:
-                return list(self.world.territories.values()), -100, True, {}
+                return ("loss", list(self.world.territories.values())), -100, True, {}
             elif self.live_players == 1:
                 self.finished = True
                 winner = [p for p in self.players.values() if p.alive][0]
@@ -239,9 +241,9 @@ class Game(object):
                     if p.ai is not None:
                         p.ai.end()
                 reward = 100 if winner.ai is None else -100
-                return list(self.world.territories.values()), reward, True, {}
+                return ("win" if reward == 00 else "loss", list(self.world.territories.values())), reward, True, {}
             else:
-                return list(self.world.territories.values()), 0, False, {}
+                return ("combat", list(self.world.territories.values())), 0, False, {}
 
     def play(self):
         while self.live_players > 1 and self.player.ai is not None:
