@@ -80,7 +80,8 @@ class Game(object):
 
         LOG.info([str(m) for m in msg])
         for p in self.players.values():
-            p.ai.event(msg)
+            if p.ai is not None:
+                p.ai.event(msg)
 
     def init(self):
         assert 2 <= len(self.players) <= 6
@@ -358,7 +359,7 @@ class Game(object):
     def initial_placement(self, empty):
         while empty:
             if self.player.ai is not None:
-                choice = self.player.ai.initial_placement(empty, self.remaining[self.player.name])
+                choice = self.player.ai.initial_placement(empty)
                 t = self.world.territory(choice)
                 if t is None:
                     self.aiwarn("invalid territory choice %s", choice)
@@ -379,7 +380,7 @@ class Game(object):
         while sum(self.remaining.values()) > 0:
             if self.remaining[self.player.name] > 0:
                 if self.player.ai is not None:
-                    choice = self.player.ai.initial_placement(None, self.remaining[self.player.name])
+                    choice = self.player.ai.initial_placement(None)
                     t = self.world.territory(choice)
                     if t is None:
                         self.aiwarn("initial invalid territory %s", choice)

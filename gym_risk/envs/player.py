@@ -8,6 +8,8 @@ class Player(object):
         self.ord = 32
         if ai_class is not None:
             self.ai = ai_class(self, game, game.world)
+        else:
+            self.ai = None
         self.world = game.world
 
     @property

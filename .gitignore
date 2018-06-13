@@ -106,3 +106,6 @@ venv.bak/
 # temp files
 \#*
 *~
+
+#test file
+test.py
