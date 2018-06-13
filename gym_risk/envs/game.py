@@ -28,7 +28,8 @@ class Game(object):
         "history": {},  # the win/loss history for each player, for multiple rounds
         "deal": False  # deal out territories rather than let players choose
     }
-    #todo recoder, les IAs devraient renvoyer action par action, et non pas renvoyer un generateur
+
+    # todo recoder, les IAs devraient renvoyer action par action, et non pas renvoyer un generateur
 
     def __init__(self, **options):
         self.options = self.defaults.copy()
@@ -90,7 +91,8 @@ class Game(object):
         for i, name in enumerate(self.turn_order):
             self.players[name].color = i + 1
             self.players[name].ord = ord('\/-|+*'[i])
-            self.players[name].ai.start()
+            if self.players[name].ai is not None:
+                self.players[name].ai.start()
         self.event(("start",))
         empty = list(self.world.territories.values())
         available = 35 - 2 * len(self.players)
@@ -150,7 +152,7 @@ class Game(object):
                 # todo reward
                 return result, 0, False, {}
             else:
-                #todo not sure
+                # todo not sure
                 self.play()
         # play
         elif not self.finished:
