@@ -126,7 +126,7 @@ class Game(object):
             return self.initial_placement(empty)
 
     def step(self, action):
-        #todo check self.player.ai == none at any time
+        # todo check self.player.ai == none at any time
         if not self.drafting:
             t = self.world.territory(action)
             if t is None:
