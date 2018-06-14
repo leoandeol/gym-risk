@@ -127,9 +127,9 @@ class Game(object):
                     self.play()
                     self.drafting = True
                     # todo which data structure
-                    return "combat", list(self.world.territories.values())
+            return "combat", list(self.world.territories.values())
         else:
-            return self.initial_placement(empty)
+            return "drafting", self.initial_placement(empty)
 
     # reward = 100*(((win/total)-(1/nb_players))/(1/nb_players))
     def step_drafting(self, action):
@@ -138,7 +138,7 @@ class Game(object):
             if t is None:
                 self.aiwarn("invalid territory choice %s", action)
                 self.turn += 1
-            if (t.owner is not None) or (t.owner is not self.player):
+            if (t.owner is not None) and (t.owner is not self.player):
                 self.aiwarn("initial invalid empty territory %s", t.name)
                 self.turn += 1
             t.forces += 1
@@ -149,7 +149,7 @@ class Game(object):
             else:
                 self.event(("reinforce", self.player, t, 1), territory=[t], player=[self.player.name])
             self.turn += 1
-            empty = [x for x in self.world.territories if x.owner is None]
+            empty = [x for x in self.world.territories.values() if x.owner is None]
             result = self.initial_placement(empty)
             if result is not None:
                 # observation, reward, done, info
@@ -164,7 +164,7 @@ class Game(object):
                 self.players["Player"].ai.start()
                 for i in range(NB_PLAYOUTS):
                     self.world = deepcopy(world_backup)
-                    while live_players > 1:
+                    while self.live_players > 1:
                         if self.player.alive:
                             choices = self.player.ai.reinforce(self.player.reinforcements)
                             assert sum(choices.values()) == self.player.reinforcements
@@ -244,7 +244,7 @@ class Game(object):
                 for p in self.players.values():
                     p.ai.end()
                 reward = 100 * (((victories / NB_PLAYOUTS) - (1 / len(self.players))) / (1 / len(self.players)))
-                return ("win", list(self.world.territories.values)), reward, True, {}
+                return ("done", list(self.world.territories.values)), reward, True, {}
 
     def step(self, action):
         # todo check self.player.ai == none at any time
@@ -514,6 +514,5 @@ class Game(object):
                     self.turn += 1
                 else:
                     return list(self.world.territories.values())
-
         self.drafting = True
         return None

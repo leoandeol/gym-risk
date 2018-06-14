@@ -56,8 +56,9 @@ class Player(object):
         return False
 
     def __deepcopy__(self, memo):
-        newobj = Player(self.name, self, lambda *x, **y: None, {})
+        newobj = Player(self.name, self, None)
         newobj.color = self.color
         newobj.ord = self.ord
+        #newobj.__dict__.update(deepcopy(self.__dict__, memo))
         newobj.world = deepcopy(self.world, memo)
         return newobj
