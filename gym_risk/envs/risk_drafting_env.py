@@ -1,7 +1,6 @@
 import gym
 from gym import error, spaces, utils
 import random
-import importlib
 from gym_risk.envs.game import Game
 from gym_risk.envs.ai.random import RandomAI
 
@@ -29,7 +28,7 @@ class DraftingRiskEnv(gym.Env):
 
     def step(self, action):
         # todo adapter à la phase drafting
-        return self.game.step(action)
+        return self.game.step_drafting(action)
 
     # todo render, curses and so on
     def render(self, mode='human', close=False):
