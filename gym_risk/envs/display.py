@@ -2,7 +2,7 @@ import collections
 import logging
 
 LOG = logging.getLogger("pyrisk")
-import curses
+#import curses
 import time
 
 

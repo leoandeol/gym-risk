@@ -6,6 +6,7 @@ class Player(object):
         self.name = name
         self.color = 0
         self.ord = 32
+        self.game = game
         if ai_class is not None:
             self.ai = ai_class(self, game, game.world)
         else:
@@ -60,5 +61,7 @@ class Player(object):
         newobj.color = self.color
         newobj.ord = self.ord
         #newobj.__dict__.update(deepcopy(self.__dict__, memo))
-        newobj.world = deepcopy(self.world, memo)
+        newobj.game = deepcopy(self.game, memo)
+        newobj.world = newobj.game.world
+        newobj.ai = type(self.ai)(newobj, newobj.game, newobj.world) if self.ai is not None else None
         return newobj
