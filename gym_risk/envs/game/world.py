@@ -35,17 +35,60 @@ Alaska--Kamchatka
 South East Asia--Indonesia
 """
 
+CONNECTIONS = {'Alaska': ['Alberta', 'Northwest Territories', 'Kamchatka'],
+               'Northwest Territories': ['Alberta', 'Greenland', 'Ontario', 'Alaska'],
+               'Greenland': ['Quebec', 'Northwest Territories', 'Ontario', 'Iceland'],
+               'Alberta': ['Western United States', 'Northwest Territories', 'Ontario', 'Alaska'],
+               'Ontario': ['Alberta', 'Quebec', 'Eastern United States', 'Greenland', 'Northwest Territories',
+                           'Western United States'], 'Quebec': ['Greenland', 'Ontario', 'Eastern United States'],
+               'Western United States': ['Alberta', 'Mexico', 'Ontario', 'Eastern United States'],
+               'Eastern United States': ['Quebec', 'Mexico', 'Ontario', 'Western United States'],
+               'Mexico': ['Venezuela', 'Eastern United States', 'Western United States'],
+               'Venezuela': ['Brazil', 'Mexico', 'Peru'], 'Brazil': ['North Africa', 'Venezuela', 'Argentina', 'Peru'],
+               'Peru': ['Brazil', 'Venezuela', 'Argentina'], 'Argentina': ['Brazil', 'Peru'],
+               'North Africa': ['East Africa', 'Egypt', 'Brazil', 'Southern Europe', 'Congo', 'Western Europe'],
+               'Egypt': ['Middle East', 'Southern Europe', 'North Africa', 'East Africa'],
+               'East Africa': ['North Africa', 'Madagascar', 'Egypt', 'South Africa', 'Middle East', 'Congo'],
+               'Congo': ['North Africa', 'East Africa', 'South Africa'],
+               'South Africa': ['Madagascar', 'East Africa', 'Congo'], 'Madagascar': ['East Africa', 'South Africa'],
+               'Iceland': ['Greenland', 'Great Britain', 'Scandinavia'],
+               'Great Britain': ['Scandinavia', 'Western Europe', 'Iceland', 'Northern Europe'],
+               'Scandinavia': ['Ukraine', 'Great Britain', 'Iceland', 'Northern Europe'],
+               'Ukraine': ['Afghanistan', 'Ural', 'Middle East', 'Southern Europe', 'Scandinavia', 'Northern Europe'],
+               'Northern Europe': ['Ukraine', 'Great Britain', 'Southern Europe', 'Scandinavia', 'Western Europe'],
+               'Western Europe': ['Great Britain', 'Southern Europe', 'North Africa', 'Northern Europe'],
+               'Southern Europe': ['North Africa', 'Ukraine', 'Egypt', 'Middle East', 'Northern Europe',
+                                   'Western Europe'],
+               'Middle East': ['Afghanistan', 'East Africa', 'Egypt', 'Ukraine', 'India', 'Southern Europe'],
+               'Afghanistan': ['Ukraine', 'India', 'Ural', 'China', 'Middle East'],
+               'India': ['South East Asia', 'Middle East', 'Afghanistan', 'China'],
+               'South East Asia': ['Indonesia', 'India', 'China'],
+               'China': ['Afghanistan', 'South East Asia', 'Ural', 'India', 'Siberia', 'Mongolia'],
+               'Mongolia': ['Kamchatka', 'China', 'Siberia', 'Japan', 'Irkutsk'], 'Japan': ['Mongolia', 'Kamchatka'],
+               'Kamchatka': ['Alaska', 'Mongolia', 'Yakutsk', 'Japan', 'Irkutsk'],
+               'Irkutsk': ['Mongolia', 'Siberia', 'Kamchatka', 'Yakutsk'],
+               'Yakutsk': ['Siberia', 'Kamchatka', 'Irkutsk'],
+               'Siberia': ['Ural', 'China', 'Mongolia', 'Yakutsk', 'Irkutsk'],
+               'Ural': ['Ukraine', 'Siberia', 'Afghanistan', 'China'],
+               'Indonesia': ['Western Australia', 'South East Asia', 'New Guinea'],
+               'New Guinea': ['Western Australia', 'Indonesia', 'Eastern Australia'],
+               'Eastern Australia': ['Western Australia', 'New Guinea'],
+               'Western Australia': ['Indonesia', 'Eastern Australia', 'New Guinea']}
+
 AREAS = {
     "North America": (5, ["Alaska", "Northwest Territories", "Greenland", "Alberta", "Ontario", "Quebec",
                           "Western United States", "Eastern United States", "Mexico"]),
     "South America": (2, ["Venezuela", "Brazil", "Peru", "Argentina"]),
     "Africa": (3, ["North Africa", "Egypt", "East Africa", "Congo", "South Africa", "Madagascar"]),
     "Europe": (
-    5, ["Iceland", "Great Britain", "Scandinavia", "Ukraine", "Northern Europe", "Western Europe", "Southern Europe"]),
+        5,
+        ["Iceland", "Great Britain", "Scandinavia", "Ukraine", "Northern Europe", "Western Europe", "Southern Europe"]),
     "Asia": (7, ["Middle East", "Afghanistan", "India", "South East Asia", "China", "Mongolia", "Japan", "Kamchatka",
                  "Irkutsk", "Yakutsk", "Siberia", "Ural"]),
     "Australia": (2, ["Indonesia", "New Guinea", "Eastern Australia", "Western Australia"])
 }
+
+AREA_TERRITORIES = {key: value[1] for (key, value) in AREAS.items()}
 
 MAP = """
   aa       bbbb b         cccccc          pp     tB B BCCCCCDDDDDDDDFFFF       
@@ -117,3 +160,26 @@ KEY = {
     "O": "Western Australia",
     "P": "Eastern Australia",
 }
+
+
+# todo improve
+class World(object):
+
+    def __init__(self, copy=None):
+        if copy is None:
+            self.owners = dict({name: None for name in KEY.values()})
+            self.forces = dict({name: 0 for name in KEY.values()})
+            #todo class attribute
+            self.connections = CONNECTIONS.copy()
+            self.areas = AREA_TERRITORIES.copy()
+            self.area_values = dict({key: value[0] for (key, value) in AREAS.items()})
+        else:
+            #todo check
+            self.owners = copy.owners.copy()
+            self.forces = copy.forces.copy()
+            self.connections = CONNECTIONS.copy()
+            self.areas = AREA_TERRITORIES.copy()
+            self.area_values = dict({key: value[0] for (key, value) in AREAS.items()})
+
+    def copy(self):
+        return World(self)

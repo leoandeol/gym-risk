@@ -1,4 +1,4 @@
-from gym_risk.envs.ai import AI
+from gym_risk.envs.game.ai import AI
 import random
 import collections
 
@@ -16,13 +16,14 @@ class RandomAI(AI):
 
     def attack(self):
         for t in self.player.territories:
-            for a in t.connect:
-                if a.owner != self.player:
-                    if t.forces > a.forces:
+            for a in self.player.world.connections[t]:
+                if self.world.owners[a] != self.player:
+                    if self.world.forces[t] > self.world.forces[a]:
                         yield (t, a, None, None)
 
     def reinforce(self, available):
-        border = [t for t in self.player.territories if t.border]
+        #todo .... territories if t.border : fix so it can work
+        border = [t for t in self.player.territories]
         result = collections.defaultdict(int)
         for i in range(available):
             t = random.choice(border)

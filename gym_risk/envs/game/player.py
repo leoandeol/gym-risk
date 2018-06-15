@@ -15,27 +15,32 @@ class Player(object):
 
     @property
     def territories(self):
-        for t in self.world.territories.values():
-            if t.owner == self:
+        for t, o in self.world.owners.items():
+            if o == self:
                 yield t
 
     @property
     def territory_count(self):
         count = 0
-        for t in self.world.territories.values():
-            if t.owner == self:
+        for t, o in self.world.owners.items():
+            if o == self:
                 count += 1
         return count
 
     @property
     def areas(self):
-        for a in self.world.areas.values():
-            if a.owner == self:
+        for a, t in self.world.areas.items():
+            test = True
+            for tt in t:
+                if self.world.owners[tt] is not self:
+                    test = False
+                    break
+            if test:
                 yield a
 
     @property
     def forces(self):
-        return sum(t.forces for t in self.territories)
+        return sum(y for x, y in self.world.forces.items() if self.world.owners[x] is self)
 
     @property
     def alive(self):
@@ -43,7 +48,7 @@ class Player(object):
 
     @property
     def reinforcements(self):
-        return max(self.territory_count // 3, 3) + sum(a.value for a in self.areas)
+        return max(self.territory_count // 3, 3) + sum(self.world.area_values[a] for a in self.areas)
 
     def __repr__(self):
         return "P;%s;%s" % (self.name, self.ai.__class__.__name__)

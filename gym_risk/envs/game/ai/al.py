@@ -1,4 +1,4 @@
-from gym_risk.envs.ai import AI
+from gym_risk.envs.game.ai import AI
 from collections import defaultdict
 import random
 

@@ -1,8 +1,7 @@
 import gym
-from gym import error, spaces, utils
 import random
 from gym_risk.envs.game import Game
-from gym_risk.envs.ai.random import RandomAI
+from gym_risk.envs.game.ai.random import RandomAI
 
 
 class DraftingRiskEnv(gym.Env):

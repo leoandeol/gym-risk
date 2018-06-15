@@ -1,5 +1,4 @@
 import random
-import logging
 
 
 class AI(object):
@@ -29,9 +28,9 @@ class AI(object):
             d = n_def
             while a > 1 and d > 0:
                 atk_dice = min(a - 1, 3)
-                atk_roll = sorted([random.randint(1, 6) for i in range(atk_dice)], reverse=True)
+                atk_roll = sorted([random.randint(1, 6) for _ in range(atk_dice)], reverse=True)
                 def_dice = min(d, 2)
-                def_roll = sorted([random.randint(1, 6) for i in range(def_dice)], reverse=True)
+                def_roll = sorted([random.randint(1, 6) for _ in range(def_dice)], reverse=True)
 
                 for aa, dd in zip(atk_roll, def_roll):
                     if aa > dd:
@@ -60,23 +59,6 @@ class AI(object):
         self.player = player
         self.game = game
         self.world = world
-        self.logger = logging.getLogger("pyrisk.ai.%s" % self.__class__.__name__)
-
-    def loginfo(self, msg, *args):
-        """
-        Logging methods. These messages will appear at the bottom of the screen
-        when in curses mode, on screen in console mode or in a logfile if you
-        specify that at the command line. 
-        """
-        self.logger.info(msg, *args)
-
-    def logwarn(self, msg, *args):
-        """As loginfo, but slightly more emphasis."""
-        self.logger.warn(msg, *args)
-
-    def logerror(self, msg, *args):
-        """As loginfo, but will cause curses mode to pause for longer over this message."""
-        self.logger.error(msg, *args)
 
     def start(self):
         """
@@ -89,17 +71,6 @@ class AI(object):
         """
         This method is called after the game has ended. Implement it if you want
         to save to file, output postmortem information, etc.
-        """
-        pass
-
-    def event(self, msg):
-        """
-        This method is called every time a game event occurs. `msg` will be a tuple
-        containing a string followed by a set of arguments, look in game.py to see
-        the types of messages that can be generated.
-        
-        Implement it if you want to know what is happening during other player's
-        turns, etc.
         """
         pass
 
