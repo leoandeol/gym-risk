@@ -219,7 +219,7 @@ class Game(object):
                     p.ai.end()
                 print(victories, i, len(self.players))
                 reward = 100 * (((victories / NB_PLAYOUTS) - (1 / len(self.players))) / (1 / len(self.players)))
-                return ("done", self.world), reward, True, {}
+                return ("done", self.world.copy()), reward, True, {}
 
     def step(self, action):
         # todo check self.player.ai == none at any time
@@ -322,7 +322,7 @@ class Game(object):
             # other AIs play
             self.play()
             if not self.player.alive:
-                return ("loss", list(self.world.territories.values())), -100, True, {}
+                return ("loss", self.world.copy()), -100, True, {}
             elif self.live_players == 1:
                 self.finished = True
                 winner = [p for p in self.players.values() if p.alive][0]
@@ -331,9 +331,9 @@ class Game(object):
                     if p.ai is not None:
                         p.ai.end()
                 reward = 100 if winner.ai is None else -100
-                return ("win" if reward == 00 else "loss", list(self.world.territories.values())), reward, True, {}
+                return ("win" if reward == 00 else "loss", self.world.copy()), reward, True, {}
             else:
-                return ("combat", list(self.world.territories.values())), 0, False, {}
+                return ("combat", self.world.copy()), 0, False, {}
 
     def play(self):
         while self.live_players > 1 and self.player.ai is not None:
@@ -410,7 +410,7 @@ class Game(object):
 
     def combat(self, src, target, f_atk, f_move):
         n_atk = self.world.forces[src]
-        n_def = self.world.forces[src]
+        n_def = self.world.forces[target]
 
         if f_atk is None:
             def f_atk(*_): return True
