@@ -21,11 +21,9 @@ class Player(object):
 
     @property
     def territory_count(self):
-        count = 0
-        for t, o in self.world.owners.items():
-            if o == self:
-                count += 1
-        return count
+        #todo document
+        #return sum(map((self).__eq__, self.world.owners.values())) #actually slower even though faster than sum(value==self for ...
+        return list(self.world.owners.values()).count(self)
 
     @property
     def areas(self):
@@ -57,9 +55,10 @@ class Player(object):
         return hash(("player", self.name))
 
     def __eq__(self, other):
-        if isinstance(other, Player):
-            return self.name == other.name
-        return False
+        #todo safer but still fast way
+        #if self.__class__.__name__ == other.__class__.__name__:
+        return self.name == other.name
+        #return False
 
     def __deepcopy__(self, memo):
         newobj = Player(self.name, self, None)

@@ -38,7 +38,12 @@ class Game(object):
         self.drafting = False
         self.finished = False
         # todo if log ....
-        logger.set_level(40)
+        # just for newer  version
+        from gym import __version__ as gym_v
+        if gym_v == "0.7.4" or gym_v == "0.7.3":
+            logger.setLevel(40)
+        else:
+            logger.set_level(40)
 
     def add_player(self, name, ai_class):
         assert name not in self.players
@@ -218,7 +223,6 @@ class Game(object):
                         victories += 1
                 for p in self.players.values():
                     p.ai.end()
-                print(victories, i, len(self.players))
                 reward = 100 * (((victories / NB_PLAYOUTS) - (1 / len(self.players))) / (1 / len(self.players)))
                 return ("done", self.world.copy()), reward, True, {}
 
