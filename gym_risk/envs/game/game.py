@@ -38,7 +38,7 @@ class Game(object):
         self.drafting = False
         self.finished = False
         # todo if log ....
-        logger.set_level(20)
+        logger.set_level(40)
 
     def add_player(self, name, ai_class):
         assert name not in self.players
@@ -144,6 +144,7 @@ class Game(object):
                     for player in self.players.values():
                         player.world = self.world
                         player.ai.world = self.world
+                    self.live_players = len(self.players)
                     while self.live_players > 1:
                         if self.player.alive:
                             choices = self.player.ai.reinforce(self.player.reinforcements)
