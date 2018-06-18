@@ -1,3 +1,5 @@
+#todo function to access owner and forces more easily
+
 CONNECT = """
 Alaska--Northwest Territories--Alberta--Alaska
 Alberta--Ontario--Greenland--Northwest Territories

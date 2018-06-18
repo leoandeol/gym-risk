@@ -44,7 +44,7 @@ class Game(object):
             logger.setLevel(40)
         else:
             logger.set_level(40)
-
+            
     def add_player(self, name, ai_class):
         assert name not in self.players
         assert len(self.players) <= 5
