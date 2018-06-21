@@ -8,7 +8,7 @@ setup(
     version="0.0.2",
     install_requires=["gym"],
     author="Léo Andéol",
-    autor_email="leo.andeol@gmail.com",
+    author_email="leo.andeol@gmail.com",
     description="An OpenAI Gym wrapper for the Risk game",
     long_description=long_description,
     url="https://github.com/leoandeol/gym-risk/",
