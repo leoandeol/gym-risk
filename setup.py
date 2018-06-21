@@ -5,7 +5,7 @@ with open("README.md","r") as f:
 
 setup(
     name="gym_risk",
-    version="0.0.3",
+    version="0.0.4",
     install_requires=["gym"],
     author="Léo Andéol",
     author_email="leo.andeol@gmail.com",

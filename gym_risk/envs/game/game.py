@@ -118,13 +118,13 @@ class Game(object):
         if not self.drafting:
             t = action
             if t not in self.world.owners.keys():
-                self.event("invalid territory choice %s", action)
+                self.event("invalid territory choice")
                 self.turn += 1
                 empty = [x for x, y in self.world.owners.items() if y is None]
                 result = self.initial_placement(empty)
                 return ("drafting", result), -100, {"error":"invalid territory"}
             if (self.world.owners[t] is not None) and (self.world.owners[t] is not self.player):
-                self.event("someone else owns this land %s", t)
+                self.event("someone else owns this land")
                 self.turn += 1
                 empty = [x for x, y in self.world.owners.items() if y is None]
                 result = self.initial_placement(empty)
