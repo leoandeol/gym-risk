@@ -1,42 +1,5 @@
 #todo function to access owner and forces more easily
 
-CONNECT = """
-Alaska--Northwest Territories--Alberta--Alaska
-Alberta--Ontario--Greenland--Northwest Territories
-Greenland--Quebec--Ontario--Eastern United States--Quebec
-Alberta--Western United States--Ontario--Northwest Territories
-Western United States--Eastern United States--Mexico--Western United States
-
-Venezuela--Peru--Argentina--Brazil
-Peru--Brazil--Venezuela
-
-North Africa--Egypt--East Africa--North Africa
-North Africa--Congo--East Africa--South Africa--Congo
-East Africa--Madagascar--South Africa
-
-Indonesia--Western Australia--Eastern Australia--New Guinea--Indonesia
-Western Australia--New Guinea
-
-Iceland--Great Britain--Western Europe--Southern Europe--Northern Europe--Western Europe
-Northern Europe--Great Britain--Scandinavia--Northern Europe--Ukraine--Scandinavia--Iceland
-Southern Europe--Ukraine
-
-Middle East--India--South East Asia--China--Mongolia--Japan--Kamchatka--Yakutsk--Irkutsk--Kamchatka--Mongolia--Irkutsk
-Yakutsk--Siberia--Irkutsk
-China--Siberia--Mongolia
-Siberia--Ural--China--Afghanistan--Ural
-Middle East--Afghanistan--India--China
-
-Mexico--Venezuela
-Brazil--North Africa
-Western Europe--North Africa--Southern Europe--Egypt--Middle East--East Africa
-Southern Europe--Middle East--Ukraine--Afghanistan--Ural
-Ukraine--Ural
-Greenland--Iceland
-Alaska--Kamchatka
-South East Asia--Indonesia
-"""
-
 CONNECTIONS = {'Alaska': ['Alberta', 'Northwest Territories', 'Kamchatka'],
                'Northwest Territories': ['Alberta', 'Greenland', 'Ontario', 'Alaska'],
                'Greenland': ['Quebec', 'Northwest Territories', 'Ontario', 'Iceland'],

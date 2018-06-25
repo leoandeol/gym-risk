@@ -2,22 +2,30 @@ import gym
 import random
 from gym_risk.envs.game import Game
 from gym_risk.envs.game.ai.random import RandomAI
+from gym.utils.seeding import create_seed, hash_seed
 
 
 class DraftingRiskEnv(gym.Env):
     """
     3 players Risk - only the drafting phase - with two Random AI to compete against
     """
+    # todo compete against itself
     # todo different AIs to compete against
     # todo env space (discrete/box) + info from step
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
         self.game = None
+        self.seed_ = None
+        self.seed()
 
     def seed(self, seed=None):
-        # todo improve with gym.utils.seeding
-        random.seed(seed)
+        if seed is None:
+            self.seed = create_seed()
+            random.seed(self.seed_)
+        else:
+            self.seed_ = hash_seed(seed)
+            random.seed(self.seed_)
 
     def reset(self):
         self.game = Game()
@@ -26,7 +34,6 @@ class DraftingRiskEnv(gym.Env):
         return self.game.init()
 
     def step(self, action):
-        # todo adapter à la phase drafting
         return self.game.step_drafting(action)
 
     # todo render, curses and so on

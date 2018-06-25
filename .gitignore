@@ -109,3 +109,6 @@ venv.bak/
 
 #test file
 test.py
+
+#nohup
+nohup.out

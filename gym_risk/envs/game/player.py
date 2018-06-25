@@ -4,8 +4,6 @@ from copy import deepcopy
 class Player(object):
     def __init__(self, name, game, ai_class):
         self.name = name
-        self.color = 0
-        self.ord = 32
         self.game = game
         if ai_class is not None:
             self.ai = ai_class(self, game, game.world)
@@ -57,14 +55,13 @@ class Player(object):
     def __eq__(self, other):
         #todo safer but still fast way
         #if self.__class__.__name__ == other.__class__.__name__:
+        if other is None:
+            return False
         return self.name == other.name
         #return False
 
     def __deepcopy__(self, memo):
         newobj = Player(self.name, self, None)
-        newobj.color = self.color
-        newobj.ord = self.ord
-        #newobj.__dict__.update(deepcopy(self.__dict__, memo))
         newobj.game = deepcopy(self.game, memo)
         newobj.world = newobj.game.world
         newobj.ai = type(self.ai)(newobj, newobj.game, newobj.world) if self.ai is not None else None

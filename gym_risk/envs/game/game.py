@@ -10,10 +10,8 @@ class Game(object):
     This class represents an individual game, and contains the main game logic.
     """
     defaults = {
-        "curses": True,  # whether to use ncurses for map display
         "color": True,  # whether to use color with ncurses
         "delay": 0.1,  # seconds to sleep after each (ncurses) display update
-        "screen": None,  # a curses.window (for use with the curses.wrapper function)
         "round": None,  # the round number
         "wait": False,  # whether to pause and wait for a keypress after each event
         "history": {},  # the win/loss history for each player, for multiple rounds
@@ -75,8 +73,6 @@ class Game(object):
         self.turn_order = list(self.players)
         random.shuffle(self.turn_order)
         for i, name in enumerate(self.turn_order):
-            self.players[name].color = i + 1
-            self.players[name].ord = ord('\/-|+*'[i])
             if self.players[name].ai is not None:
                 self.players[name].ai.start()
         self.event(("start",))
@@ -193,7 +189,6 @@ class Game(object):
                                 initial_forces = (self.world.forces[src], self.world.forces[target])
                                 opponent = self.world.owners[target]
                                 victory = self.combat(src, target, attack, move)
-                                #todo corriger ça ???
                                 final_forces = (self.world.forces[src], self.world.forces[target])
                                 self.event(("conquer" if victory else "defeat", self.player, opponent, src, target,
                                             initial_forces, final_forces))
@@ -497,10 +492,7 @@ class Game(object):
                     self.turn += 1
                 else:
                     return self.world.copy()
+            else:
+                self.turn += 1
         self.drafting = True
         return None
-
-    def __deepcopy__(self, memo):
-        newobj = Game()
-        newobj.__dict__.update(deepcopy(self.__dict__, memo))
-        return newobj
