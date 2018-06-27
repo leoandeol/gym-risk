@@ -4,7 +4,7 @@ from gym import logger
 import random
 from copy import deepcopy
 
-
+#optimiser player __eq__, attack, count(oflist), step drafting, territories, event, combat
 class Game(object):
     """
     This class represents an individual game, and contains the main game logic.

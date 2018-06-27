@@ -21,7 +21,7 @@ class DraftingRiskEnv(gym.Env):
 
     def seed(self, seed=None):
         if seed is None:
-            self.seed = create_seed()
+            self.seed_ = create_seed()
             random.seed(self.seed_)
         else:
             self.seed_ = hash_seed(seed)
